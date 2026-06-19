@@ -2,419 +2,175 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>SIGNUM | BTC/ETH Scalping Engine</title>
+  <title>CVD SCALPER</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
-    :root{--bg:#050810;--card:#0a0f1c;--neon-green:#00ff88;--neon-red:#ff3366;--neon-orange:#ff9500;--neon-blue:#00d4ff;--neon-purple:#b829dd;--text:#e0e6ed;--muted:#6b7280;--border:#1e293b;--glow-green:0 0 20px rgba(0,255,136,0.5);--glow-red:0 0 20px rgba(255,51,102,0.5);--glow-orange:0 0 20px rgba(255,149,0,0.5)}
-    *{box-sizing:border-box;margin:0;padding:0;font-family:'Rajdhani',sans-serif;-webkit-tap-highlight-color:transparent}
-    body{background:var(--bg);color:var(--text);min-height:100vh;padding:1rem;background-image:radial-gradient(circle at 20% 50%,rgba(0,212,255,0.05) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(184,41,221,0.05) 0%,transparent 50%)}
-    .header{text-align:center;margin-bottom:1.5rem;padding:1rem;border:1px solid var(--border);border-radius:12px;background:linear-gradient(135deg,rgba(10,15,28,0.8) 0%,rgba(5,8,16,0.9) 100%);position:relative;overflow:hidden}
-    .header::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--neon-blue),transparent);animation:scan 3s linear infinite}
-    @keyframes scan{0%{left:-100%}100%{left:100%}}
-    .logo{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,6vw,2.5rem);font-weight:900;background:linear-gradient(135deg,var(--neon-green) 0%,var(--neon-blue) 50%,var(--neon-purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,212,255,0.3);letter-spacing:4px}
-    .subtitle{color:var(--muted);font-size:0.85rem;margin-top:0.3rem;letter-spacing:2px}
-    .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-bottom:1.5rem}
-    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.8rem;text-align:center;position:relative;overflow:hidden}
-    .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--neon-blue),var(--neon-purple))}
-    .stat-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-    .stat-value{font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:700;color:var(--neon-blue);margin-top:0.2rem}
-    .grid{display:grid;gap:1.2rem;max-width:900px;margin:0 auto}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.2rem;position:relative;overflow:hidden;transition:all 0.3s ease}
-    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--neon-blue),var(--neon-purple));opacity:0;transition:opacity 0.3s}
-    .card.active::before{opacity:1}
-    .asset-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:0.5rem}
-    .asset-name{font-family:'Orbitron',monospace;font-weight:700;font-size:1.2rem;display:flex;align-items:center;gap:0.5rem}
-    .asset-dot{width:8px;height:8px;border-radius:50%;background:var(--neon-blue);box-shadow:0 0 10px var(--neon-blue);animation:pulse 2s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-    .price-group{display:flex;flex-direction:column;align-items:flex-end;gap:0.2rem}
-    .price{font-family:'Orbitron',monospace;font-size:clamp(1.2rem,4vw,1.5rem);font-weight:700;color:var(--neon-blue)}
-    .price-inr{font-size:0.85rem;color:var(--neon-orange);font-weight:600}
-    .currency-toggle{display:flex;gap:0.3rem;margin-top:0.3rem}
-    .currency-btn{padding:0.2rem 0.5rem;font-size:0.7rem;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:4px;cursor:pointer;transition:all 0.2s}
-    .currency-btn.active{background:var(--neon-blue);color:var(--bg);border-color:var(--neon-blue);font-weight:700}
-    .metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:0.6rem;margin:1rem 0}
-    .metric{background:rgba(30,41,59,0.5);padding:0.7rem;border-radius:10px;border:1px solid rgba(30,41,59,0.8);transition:all 0.3s}
-    .metric:hover{border-color:var(--neon-blue);transform:translateY(-2px)}
-    .metric-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-    .metric-value{font-family:'Orbitron',monospace;font-size:0.95rem;margin-top:0.2rem;font-weight:600}
-    .signal-box{text-align:center;padding:1rem;border-radius:12px;margin-top:1rem;font-family:'Orbitron',monospace;font-weight:700;font-size:1.1rem;letter-spacing:2px;border:2px solid;position:relative;overflow:hidden}
-    .signal-box.buy{background:rgba(0,255,136,0.1);color:var(--neon-green);border-color:var(--neon-green);box-shadow:var(--glow-green);animation:glow-green 2s ease-in-out infinite}
-    .signal-box.sell{background:rgba(255,51,102,0.1);color:var(--neon-red);border-color:var(--neon-red);box-shadow:var(--glow-red);animation:glow-red 2s ease-in-out infinite}
-    .signal-box.neutral{background:rgba(255,149,0,0.1);color:var(--neon-orange);border-color:var(--neon-orange);box-shadow:var(--glow-orange)}
-    .signal-box.strong-buy{background:rgba(0,255,136,0.2);color:var(--neon-green);border-color:var(--neon-green);box-shadow:0 0 30px rgba(0,255,136,0.7);animation:none}
-    .signal-box.strong-sell{background:rgba(255,51,102,0.2);color:var(--neon-red);border-color:var(--neon-red);box-shadow:0 0 30px rgba(255,51,102,0.7);animation:none}
-    @keyframes glow-green{0%,100%{box-shadow:0 0 20px rgba(0,255,136,0.3)}50%{box-shadow:0 0 30px rgba(0,255,136,0.6)}}
-    @keyframes glow-red{0%,100%{box-shadow:0 0 20px rgba(255,51,102,0.3)}50%{box-shadow:0 0 30px rgba(255,51,102,0.6)}}
-    .indicators{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
-    .indicator-tag{display:inline-block;padding:0.3rem 0.6rem;margin:0.2rem;border-radius:6px;font-size:0.75rem;font-weight:600;background:rgba(30,41,59,0.8);border:1px solid var(--border)}
-    .indicator-tag.bullish{color:var(--neon-green);border-color:var(--neon-green);background:rgba(0,255,136,0.1)}
-    .indicator-tag.bearish{color:var(--neon-red);border-color:var(--neon-red);background:rgba(255,51,102,0.1)}
-    .indicator-tag.neutral-tag{color:var(--neon-orange);border-color:var(--neon-orange);background:rgba(255,149,0,0.1)}
-    .analyze-btn{width:100%;margin-top:1rem;padding:0.9rem;background:transparent;border:2px solid var(--neon-green);color:var(--neon-green);border-radius:10px;font-family:'Orbitron',monospace;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:2px;position:relative;overflow:hidden;min-height:48px}
-    .analyze-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent);transition:left 0.5s}
-    .analyze-btn:hover::before{left:100%}
-    .analyze-btn:hover{background:var(--neon-green);color:var(--bg);box-shadow:var(--glow-green)}
-    .controls{text-align:center;margin-top:1.5rem;padding-bottom:env(safe-area-inset-bottom)}
-    .refresh-btn{background:transparent;border:2px solid var(--neon-blue);color:var(--neon-blue);padding:0.9rem 1.5rem;border-radius:12px;cursor:pointer;font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:600;width:100%;max-width:300px;margin:0 auto;display:block;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px;min-height:48px}
-    .refresh-btn:hover{background:var(--neon-blue);color:var(--bg);box-shadow:0 0 20px rgba(0,212,255,0.4)}
-    .status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:0.8rem;color:var(--muted);font-size:0.8rem;padding:0 0.5rem}
-    .paper-trading{margin-top:1.5rem;padding:1.2rem;background:var(--card);border:1px solid var(--border);border-radius:16px}
-    .paper-trading h3{font-family:'Orbitron',monospace;color:var(--neon-purple);margin-bottom:1rem;font-size:1.1rem}
-    .trade-log{max-height:200px;overflow-y:auto;margin-top:1rem}
-    .trade-item{display:flex;justify-content:space-between;padding:0.6rem;margin:0.3rem 0;background:rgba(30,41,59,0.5);border-radius:8px;border-left:3px solid;font-size:0.85rem}
-    .trade-item.buy{border-left-color:var(--neon-green)}.trade-item.sell{border-left-color:var(--neon-red)}
-    .error{color:var(--neon-red);text-align:center;padding:1rem;background:rgba(255,51,102,0.1);border-radius:12px;margin-top:1rem;display:none;border:1px solid var(--neon-red)}
-    .loading{opacity:0.7;pointer-events:none}
-    @media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
-    .connection-status{display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.75rem;font-weight:600}
-    .connection-status.online{background:rgba(0,255,136,0.1);color:var(--neon-green)}.connection-status.offline{background:rgba(255,51,102,0.1);color:var(--neon-red)}
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}
-    @media(max-width:640px){input,select,button{font-size:16px}}
-    
-    /* Setup Guide Modal Styles */
-    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all 0.3s}
-    .modal-overlay.active{opacity:1;visibility:visible}
-    .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:800px;width:95%;max-height:90vh;overflow-y:auto;padding:1.5rem;position:relative}
-    .modal-close{position:absolute;top:1rem;right:1rem;background:var(--neon-red);border:none;color:var(--bg);width:32px;height:32px;border-radius:50%;font-weight:700;cursor:pointer;font-family:'Orbitron',monospace}
-    .modal h2{font-family:'Orbitron',monospace;color:var(--neon-blue);margin-bottom:1rem;font-size:1.4rem}
-    .modal h3{font-family:'Orbitron',monospace;color:var(--neon-green);margin:1.2rem 0 0.5rem;font-size:1.1rem}
-    .modal p{color:var(--text);margin:0.5rem 0;line-height:1.5}
-    .modal code{background:rgba(30,41,59,0.8);padding:0.2rem 0.4rem;border-radius:4px;font-family:monospace;font-size:0.9rem;color:var(--neon-orange)}
-    .modal pre{background:rgba(30,41,59,0.8);padding:1rem;border-radius:8px;overflow-x:auto;margin:0.8rem 0;font-size:0.85rem}
-    .modal ul{margin:0.5rem 0 0.5rem 1.5rem}
-    .modal li{margin:0.3rem 0;color:var(--text)}
-    .setup-btn{background:var(--neon-purple);border:none;color:var(--bg);padding:0.6rem 1.2rem;border-radius:8px;font-family:'Orbitron',monospace;font-weight:700;cursor:pointer;margin:0.3rem;transition:all 0.2s}
-    .setup-btn:hover{box-shadow:0 0 15px rgba(184,41,221,0.5)}
-    .copy-btn{background:var(--neon-blue);border:none;color:var(--bg);padding:0.4rem 0.8rem;border-radius:6px;font-weight:600;cursor:pointer;margin-left:0.5rem;font-size:0.8rem}
-    .copy-btn.copied{background:var(--neon-green)}
-    .footer-note{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--muted);font-size:0.8rem;text-align:center}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+    body{background:#050810;color:#e0e6ed;min-height:100vh;padding:1rem;padding-bottom:80px}
+    .header{text-align:center;padding:1.5rem 0;border-bottom:1px solid #1e293b;margin-bottom:1.5rem}
+    .logo{font-size:1.8rem;font-weight:900;background:linear-gradient(90deg,#00ff88,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .status{margin-top:0.5rem;padding:0.4rem 1rem;border-radius:20px;display:inline-block;font-size:0.85rem;font-weight:600}
+    .status.connected{background:rgba(0,255,136,0.15);color:#00ff88}
+    .status.disconnected{background:rgba(255,51,102,0.15);color:#ff3366}
+    .card{background:#0a0f1c;border:1px solid #1e293b;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+    .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+    .name{font-size:1.2rem;font-weight:700}
+    .price{font-size:1.5rem;font-weight:800}
+    .price.up{color:#00ff88}.price.down{color:#ff3366}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+    .box{background:rgba(30,41,59,0.5);padding:0.8rem;border-radius:8px;text-align:center}
+    .label{font-size:0.7rem;color:#6b7280;text-transform:uppercase;margin-bottom:0.3rem}
+    .value{font-size:1.1rem;font-weight:700}
+    .signal{margin-top:1rem;padding:1rem;border-radius:10px;text-align:center;font-weight:800;font-size:1.1rem;border:2px solid}
+    .signal.buy{background:rgba(0,255,136,0.1);color:#00ff88;border-color:#00ff88}
+    .signal.sell{background:rgba(255,51,102,0.1);color:#ff3366;border-color:#ff3366}
+    .debug{background:rgba(255,149,0,0.1);border:1px solid #ff9500;color:#ff9500;padding:0.8rem;border-radius:8px;margin:1rem 0;font-size:0.8rem;word-break:break-all}
+    .log{background:rgba(30,41,59,0.3);padding:0.5rem;border-radius:6px;margin-top:0.5rem;font-size:0.75rem;color:#6b7280}
+    .nav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,15,28,0.95);backdrop-filter:blur(10px);border-top:1px solid #1e293b;display:flex;justify-content:space-around;padding:0.8rem 0 1.2rem}
+    .nav-item{text-align:center;font-size:0.75rem;color:#6b7280}
+    .nav-item.active{color:#00d4ff}
+    .nav-icon{font-size:1.3rem;margin-bottom:0.2rem}
   </style>
 </head>
 <body>
-  <!-- SETUP GUIDE BUTTON -->
-  <div style="position:fixed;top:1rem;right:1rem;z-index:100">
-    <button class="setup-btn" onclick="toggleModal()">📋 SETUP GUIDE</button>
-  </div>
-
-  <!-- MAIN APP HEADER -->
   <div class="header">
-    <div class="logo">⚡ SIGNUM</div>
-    <div class="subtitle">BTC/ETH SCALPING ENGINE • 15M • REAL-TIME • INDIA OPTIMIZED</div>
+    <div class="logo">⚡ CVD SCALPER</div><br>
+    <div class="status disconnected" id="status">Connecting...</div>
   </div>
 
-  <!-- STATS BAR -->
-  <div class="stats-bar">
-    <div class="stat-card"><div class="stat-label">Paper Trades</div><div class="stat-value" id="total-trades">0</div></div>
-    <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="win-rate">--</div></div>
-    <div class="stat-card"><div class="stat-label">Total P&L</div><div class="stat-value" id="total-pnl">--</div></div>
+  <div id="debug-info" class="debug" style="display:none"></div>
+  <div id="cards"></div>
+
+  <div class="nav">
+    <div class="nav-item active"><div class="nav-icon">📊</div>Signals</div>
+    <div class="nav-item"><div class="nav-icon">📝</div>Trades</div>
+    <div class="nav-item"><div class="nav-icon">ℹ️</div>Info</div>
   </div>
-
-  <!-- SIGNALS GRID -->
-  <main class="grid" id="signals-container"></main>
-  <div class="error" id="error-msg"></div>
-
-  <!-- PAPER TRADING -->
-  <div class="paper-trading">
-    <h3>📊 PAPER TRADE LOG</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1rem">
-      <select id="log-coin" style="padding:0.6rem;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;min-height:44px">
-        <option value="BTC">BTC</option><option value="ETH">ETH</option>
-      </select>
-      <select id="log-type" style="padding:0.6rem;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;min-height:44px">
-        <option value="BUY">BUY</option><option value="SELL">SELL</option>
-      </select>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:0.5rem">
-      <input type="number" id="log-entry" placeholder="Entry Price (USD)" style="padding:0.6rem;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;min-height:44px">
-      <input type="number" id="log-exit" placeholder="Exit Price (opt)" style="padding:0.6rem;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;min-height:44px">
-      <button onclick="addTrade()" style="padding:0.6rem;background:var(--neon-green);border:none;color:var(--bg);border-radius:8px;font-weight:700;cursor:pointer;min-height:44px">+ LOG</button>
-    </div>
-    <div class="trade-log" id="trade-log"></div>
-  </div>
-
-  <!-- CONTROLS -->
-  <div class="controls">
-    <button class="refresh-btn" onclick="fetchAllSignals()">🔄 ANALYZE BTC/ETH</button>
-    <div class="status-bar">
-      <span id="status">Next update in 5s</span>
-      <span class="connection-status online" id="connection-status">● LIVE</span>
-    </div>
-  </div>
-
-  <!-- SETUP GUIDE MODAL (README + .gitignore) -->
-  <div class="modal-overlay" id="setupModal">
-    <div class="modal">
-      <button class="modal-close" onclick="toggleModal()">×</button>
-      <h2>🚀 SIGNUM Deployment Guide</h2>
-      
-      <h3>✨ Features</h3>
-      <ul>
-        <li>✅ Real-time BTC/ETH via Binance public API (no auth)</li>
-        <li>✅ Technical indicators: RSI, EMA, SMA, MACD, Volume</li>
-        <li>✅ Signal engine: BUY/SELL/NEUTRAL with confidence</li>
-        <li>✅ INR/USD toggle (India-optimized)</li>
-        <li>✅ Paper trading with P&L tracking (localStorage)</li>
-        <li>✅ Mobile-responsive, zero backend, zero cost</li>
-      </ul>
-
-      <h3>📦 Deploy to GitHub Pages (30 seconds)</h3>
-      <ol style="margin-left:1.5rem;color:var(--text)">
-        <li>Create new repo: <code>signum-crypto-signals</code></li>
-        <li>Upload this <code>index.html</code> file</li>
-        <li>Go to repo <code>Settings → Pages</code></li>
-        <li>Source: <code>Deploy from branch</code> → <code>main</code> → <code>/ (root)</code></li>
-        <li>Click <strong>Save</strong> → Visit your live URL!</li>
-      </ol>
-
-      <h3>📄 .gitignore Content <button class="copy-btn" onclick="copyGitignore()">📋 Copy</button></h3>
-      <pre id="gitignoreContent"># Logs
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Local config
-config.local.js
-.env
-
-# Build outputs
-dist/
-build/
-node_modules/</pre>
-
-      <h3>⚠️ Important Notes</h3>
-      <ul>
-        <li><strong>Binance API</strong>: Public endpoints only — no keys needed. Rate limit: ~1200/min</li>
-        <li><strong>Mock fallback</strong>: App uses simulated data if API fails (for demo continuity)</li>
-        <li><strong>No AI integration</strong>: Pure technical analysis. AI hooks commented for future use</li>
-        <li><strong>WebSocket disabled</strong>: For GitHub Pages CORS compatibility. Auto-refresh every 5s</li>
-        <li><strong>Paper trading only</strong>: Educational use. Not financial advice</li>
-      </ul>
-
-      <h3>🔧 Future Enhancements (Optional)</h3>
-      <ul>
-        <li>Add Groq/Claude AI signals (requires backend proxy)</li>
-        <li>Telegram/Discord alerts via webhook</li>
-        <li>Export trade logs to CSV</li>
-        <li>Add more assets (user prefers BTC/ETH only for now)</li>
-      </ul>
-
-      <div class="footer-note">
-        <strong>⚠️ Disclaimer</strong>: Educational tool only. Crypto trading involves substantial risk. 
-        Never trade with money you cannot afford to lose. MIT License.
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN APP SCRIPT -->
   <script>
-    // ================= CONFIGURATION =================
-    const CONFIG = {interval:'15m',limit:100,refreshMs:5000,rsiPeriod:14,smaPeriod:50,volPeriod:20,volMultiplier:1.5,usdToInr:83.5,showInr:false};
-    const ASSETS = [{symbol:'BTCUSDT',name:'Bitcoin',color:'#f7931a'},{symbol:'ETHUSDT',name:'Ethereum',color:'#627eea'}];
-    const fmt = (n,d=2) => Number(n).toFixed(d);
-    const fmtPrice = (n,currency='USD') => {
-      const value = CONFIG.showInr && currency==='USD' ? n*CONFIG.usdToInr : n;
-      const symbol = CONFIG.showInr && currency==='USD' ? '₹' : '$';
-      const locale = CONFIG.showInr && currency==='USD' ? 'en-IN' : 'en-US';
-      return `${symbol}${Number(value).toLocaleString(locale,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+    let data = {
+      'BTCUSDT': { price: 67000, cvd: 0, trades: 0 },
+      'ETHUSDT': { price: 3500, cvd: 0, trades: 0 }
     };
-    const toggleCurrency = () => {
-      CONFIG.showInr = !CONFIG.showInr;
-      document.querySelectorAll('.currency-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(`btn-${CONFIG.showInr?'inr':'usd'}`).classList.add('active');
-      fetchAllSignals();
-    };
-    const toggleModal = () => document.getElementById('setupModal').classList.toggle('active');
-    const copyGitignore = () => {
-      const content = document.getElementById('gitignoreContent').textContent;
-      navigator.clipboard.writeText(content).then(() => {
-        const btn = event.target;
-        btn.textContent = '✓ Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
-      });
-    };
+    let ws = null;
+    let messageCount = 0;
 
-    // ================= TECHNICAL INDICATORS =================
-    function calculateRSI(closes, period = CONFIG.rsiPeriod) {
-      if (closes.length < period + 1) return 50;
-      let gains = 0, losses = 0;
-      for (let i = 1; i <= period; i++) { const diff = closes[i] - closes[i-1]; diff >= 0 ? gains += diff : losses -= diff; }
-      let avgGain = gains / period, avgLoss = losses / period;
-      for (let i = period + 1; i < closes.length; i++) {
-        const diff = closes[i] - closes[i-1];
-        avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
-        avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
-      }
-      const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-      return 100 - (100 / (1 + rs));
-    }
-    function calculateSMA(arr, period) { return arr.slice(-period).reduce((a, b) => a + b, 0) / period; }
-    function calculateEMA(arr, period) {
-      const k = 2 / (period + 1); let ema = arr[0];
-      for (let i = 1; i < arr.length; i++) ema = arr[i] * k + ema * (1 - k);
-      return ema;
+    function showDebug(msg) {
+      const debug = document.getElementById('debug-info');
+      debug.textContent = msg;
+      debug.style.display = 'block';
+      console.log(msg);
     }
 
-    // ================= DATA FETCHING =================
-    async function fetchKlines(symbol) {
+    function connect() {
+      const status = document.getElementById('status');
+      
+      // Try REST API first to get initial prices
+      fetchInitialPrices();
+      
+      // Then connect WebSocket
+      status.textContent = 'Connecting...';
+      
+      // Use combined stream
+      const wsUrl = 'wss://stream.binance.com:9443/ws/btcusdt@trade/ethusdt@trade';
+      ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        status.textContent = '● LIVE';
+        status.className = 'status connected';
+        showDebug('WebSocket connected to: ' + wsUrl);
+      };
+      
+      ws.onmessage = (event) => {
+        messageCount++;
+        try {
+          const msg = JSON.parse(event.data);
+          showDebug(`Msg ${messageCount}: ${JSON.stringify(msg).substring(0, 100)}...`);
+          
+          const symbol = msg.s; // e.g., "BTCUSDT"
+          if (data[symbol]) {
+            const price = parseFloat(msg.p);
+            const qty = parseFloat(msg.q);
+            const isBuyerMaker = msg.m;
+            
+            data[symbol].price = price;
+            data[symbol].cvd += isBuyerMaker ? -qty : qty;
+            data[symbol].trades++;
+                        render();
+          }
+        } catch (e) {
+          showDebug('Error parsing: ' + e.message);
+        }
+      };
+      
+      ws.onerror = (err) => {
+        showDebug('WebSocket error: ' + err);
+        status.textContent = '● ERROR';
+        status.className = 'status disconnected';
+      };
+      
+      ws.onclose = () => {
+        status.textContent = '● RECONNECTING...';
+        setTimeout(connect, 3000);
+      };
+    }
+
+    async function fetchInitialPrices() {
       try {
-        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${CONFIG.interval}&limit=${CONFIG.limit}`);
-        if (!res.ok) throw new Error(`API ${res.status}`);
-        return await res.json();
+        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=["BTCUSDT","ETHUSDT"]');
+        const prices = await response.json();
+        prices.forEach(p => {
+          if (data[p.symbol]) {
+            data[p.symbol].price = parseFloat(p.price);
+          }
+        });
+        render();
+        showDebug('Initial prices loaded from REST API');
       } catch (e) {
-        console.warn(`Fetch failed for ${symbol}: ${e.message} — using mock data`);
-        return generateMockData();
+        showDebug('REST API failed: ' + e.message);
       }
     }
-    function generateMockData() {
-      const base = Math.random() * 1000 + 60000;
-      return Array(CONFIG.limit).fill(0).map((_, i) => [
-        Date.now() - (CONFIG.limit - i) * 15 * 60 * 1000,
-        base, base + Math.random()*100, base - Math.random()*100,
-        base + Math.random()*50 - 25, Math.random()*1000
-      ]);
-    }
 
-    // ================= ANALYSIS ENGINE =================
-    function analyzeData(klines) {
-      const closes = klines.map(k => parseFloat(k[4])), volumes = klines.map(k => parseFloat(k[5]));
-      const currentPrice = closes[closes.length - 1], currentVol = volumes[volumes.length - 1];
-      const rsi = calculateRSI(closes), sma50 = calculateSMA(closes, CONFIG.smaPeriod);
-      const ema9 = calculateEMA(closes, 9), ema21 = calculateEMA(closes, 21), volMA = calculateSMA(volumes, CONFIG.volPeriod);
-      const ema12 = calculateEMA(closes, 12), ema26 = calculateEMA(closes, 26), macdSignal = ema12 > ema26;
-      return { price: currentPrice, rsi, sma50, ema9, ema21, vol: currentVol, volMA, macdSignal, 
-               trend: currentPrice > sma50 ? 'UPTREND' : 'DOWNTREND', emaBullish: ema9 > ema21, volRatio: currentVol / volMA };
-    }
-
-    // ================= SIGNAL GENERATION =================
-    function generateSignal(d) {
-      const indicators = []; let strength = 0;
-      if (d.rsi < 30) { indicators.push({name:'RSI Oversold',type:'bullish'}); strength += 2; }
-      else if (d.rsi > 70) { indicators.push({name:'RSI Overbought',type:'bearish'}); strength -= 2; }
-      else { indicators.push({name:`RSI ${fmt(d.rsi)}`,type:'neutral'}); }
-      if (d.emaBullish) { indicators.push({name:'EMA 9>21',type:'bullish'}); strength++; }
-      else { indicators.push({name:'EMA 9<21',type:'bearish'}); strength--; }
-      if (d.trend === 'UPTREND') { indicators.push({name:'Above SMA50',type:'bullish'}); strength++; }
-      else { indicators.push({name:'Below SMA50',type:'bearish'}); strength--; }
-      if (d.volRatio > CONFIG.volMultiplier) { indicators.push({name:`Vol ${fmt(d.volRatio,1)}x`,type:'bullish'}); strength += 1.5; }
-      else { indicators.push({name:`Vol ${fmt(d.volRatio,1)}x`,type:'neutral'}); }
-      if (d.macdSignal) { indicators.push({name:'MACD Bullish',type:'bullish'}); strength++; }
-      else { indicators.push({name:'MACD Bearish',type:'bearish'}); strength--; }
-      let signal = 'NEUTRAL';
-      if (strength >= 4) signal = 'BUY'; else if (strength <= -4) signal = 'SELL';
-      else if (strength >= 2) signal = 'WEAK_BUY'; else if (strength <= -2) signal = 'WEAK_SELL';
-      return { signal, indicators, strength, confidence: Math.min(0.95, Math.abs(strength) / 6) };
-    }
-
-    // ================= UI RENDERING =================
-    function renderAssets() {
-      const container = document.getElementById('signals-container');
-      container.innerHTML = ASSETS.map(asset => `
-        <div class="card" id="${asset.symbol}-card">
-          <div class="asset-header">
-            <div class="asset-name"><span class="asset-dot" style="background:${asset.color};box-shadow:0 0 10px ${asset.color}"></span>${asset.name}</div>
-            <div class="price-group">
-              <div class="price" id="${asset.symbol}-price">Loading...</div>
-              <div class="price-inr" id="${asset.symbol}-inr"></div>
-              <div class="currency-toggle">
-                <button class="currency-btn ${!CONFIG.showInr?'active':''}" id="btn-usd" onclick="toggleCurrency()">USD</button>
-                <button class="currency-btn ${CONFIG.showInr?'active':''}" id="btn-inr" onclick="toggleCurrency()">INR</button>
+    function render() {
+      const container = document.getElementById('cards');
+      container.innerHTML = Object.entries(data).map(([sym, d]) => {
+        const isUp = d.cvd >= 0;
+        return `
+          <div class="card">
+            <div class="row">
+              <div class="name">${sym}</div>
+              <div class="price ${isUp ? 'up' : 'down'}">$${d.price.toFixed(2)}</div>
+            </div>
+            <div class="grid">
+              <div class="box">
+                <div class="label">CVD</div>
+                <div class="value">${d.cvd.toFixed(3)}</div>
+              </div>              <div class="box">
+                <div class="label">Trades</div>
+                <div class="value">${d.trades}</div>
+              </div>
+              <div class="box">
+                <div class="label">Last Price</div>
+                <div class="value">$${d.price.toFixed(0)}</div>
+              </div>
+              <div class="box">
+                <div class="label">Signal</div>
+                <div class="value" style="color:${isUp ? '#00ff88' : '#ff3366'}">${isUp ? '🟢 BUY' : '🔴 SELL'}</div>
               </div>
             </div>
+            <div class="signal ${isUp ? 'buy' : 'sell'}">
+              ${isUp ? 'BUY PRESSURE' : 'SELL PRESSURE'}
+            </div>
+            <div class="log">Messages received: ${messageCount}</div>
           </div>
-          <div class="metrics">
-            <div class="metric"><div class="metric-label">RSI (14)</div><div class="metric-value" id="${asset.symbol}-rsi">--</div></div>
-            <div class="metric"><div class="metric-label">Trend</div><div class="metric-value" id="${asset.symbol}-trend">--</div></div>
-            <div class="metric"><div class="metric-label">MACD</div><div class="metric-value" id="${asset.symbol}-macd">--</div></div>
-            <div class="metric"><div class="metric-label">Volume</div><div class="metric-value" id="${asset.symbol}-vol">--</div></div>
-          </div>
-          <div class="indicators" id="${asset.symbol}-indicators"></div>
-          <div class="signal-box neutral" id="${asset.symbol}-signal">SCANNING...</div>
-          <button class="analyze-btn" onclick="analyzeSingle('${asset.symbol}')">⚡ Analyze ${asset.symbol.replace('USDT','')}</button>
-        </div>`).join('');
-    }
-    function updateUI(symbol, d, signalData) {
-      document.getElementById(`${symbol}-price`).textContent = fmtPrice(d.price,'USD');
-      document.getElementById(`${symbol}-inr`).textContent = CONFIG.showInr ? '' : `≈ ${fmtPrice(d.price,'INR')}`;
-      document.getElementById(`${symbol}-rsi`).textContent = fmt(d.rsi);
-      document.getElementById(`${symbol}-trend`).textContent = d.trend==='UPTREND'?'📈 Bullish':'📉 Bearish';
-      document.getElementById(`${symbol}-macd`).textContent = d.macdSignal?'🟢 Bullish':'🔴 Bearish';
-      document.getElementById(`${symbol}-vol`).textContent = `${fmt(d.volRatio,1)}x`;
-      document.getElementById(`${symbol}-indicators`).innerHTML = signalData.indicators.map(ind => `<span class="indicator-tag ${ind.type}">${ind.name}</span>`).join('');
-      const signalEl = document.getElementById(`${symbol}-signal`);
-      const displaySignal = signalData.signal.replace('WEAK_','').replace('STRONG_','');
-      signalEl.textContent = `${displaySignal} ${signalData.confidence>0.7?'★':''}`;
-      let signalClass = signalData.signal.toLowerCase().replace('_','-');
-      if (signalData.confidence>0.8 && (signalData.signal.includes('STRONG')||Math.abs(signalData.strength)>=5)) 
-        signalClass = signalClass.includes('buy')?'strong-buy':'strong-sell';
-      signalEl.className = `signal-box ${signalClass}`;
-      document.getElementById(`${symbol}-card`).classList.add('active');
-      setTimeout(() => document.getElementById(`${symbol}-card`).classList.remove('active'), 300);
-    }
-    async function fetchAllSignals() {
-      const errEl = document.getElementById('error-msg'); errEl.style.display = 'none'; document.body.classList.add('loading');
-      try {
-        await Promise.all(ASSETS.map(async asset => {
-          const klines = await fetchKlines(asset.symbol), data = analyzeData(klines), signalData = generateSignal(data);
-          updateUI(asset.symbol, data, signalData);
-        }));
-      } catch (e) {
-        errEl.textContent = `⚠️ Update paused: ${e.message}`; errEl.style.display = 'block';
-        document.getElementById('connection-status').className = 'connection-status offline';
-        document.getElementById('connection-status').textContent = '● OFFLINE';
-      } finally { document.body.classList.remove('loading'); }
-    }
-    async function analyzeSingle(symbol) {
-      const btn = event.target, originalText = btn.textContent;
-      btn.textContent = '⚡ ANALYZING...'; btn.disabled = true;
-      try { const klines = await fetchKlines(symbol), data = analyzeData(klines), signalData = generateSignal(data); updateUI(symbol, data, signalData); }
-      catch (e) { alert(`Error analyzing ${symbol}: ${e.message}`); }
-      finally { btn.textContent = originalText; btn.disabled = false; }
+        `;
+      }).join('');
     }
 
-    // ================= PAPER TRADING =================
-    function loadTrades() { return JSON.parse(localStorage.getItem('signum_trades')||'[]'); }
-    function saveTrades(trades) { localStorage.setItem('signum_trades', JSON.stringify(trades)); updateStats(); }
-    function addTrade() {
-      const coin = document.getElementById('log-coin').value, type = document.getElementById('log-type').value;
-      const entry = parseFloat(document.getElementById('log-entry').value), exit = parseFloat(document.getElementById('log-exit').value)||null;
-      if (!entry) { alert('Enter entry price'); return; }
-      const trades = loadTrades(); trades.unshift({coin,type,entry,exit,time:new Date().toISOString()});
-      saveTrades(trades); renderTrades();
-      document.getElementById('log-entry').value = ''; document.getElementById('log-exit').value = '';
-    }
-    function renderTrades() {
-      const trades = loadTrades(), container = document.getElementById('trade-log');
-      if (trades.length === 0) { container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:1rem">No trades logged yet</div>'; return; }
-      container.innerHTML = trades.slice(0,10).map(trade => {
-        const pnl = trade.exit ? ((trade.exit-trade.entry)/trade.entry*100*(trade.type==='BUY'?1:-1)).toFixed(2) : null;
-        return `<div class="trade-item ${trade.type.toLowerCase()}"><span><strong>${trade.coin}</strong> ${trade.type} @ ${fmtPrice(trade.entry)}</span><span>${trade.exit?fmtPrice(trade.exit):'OPEN'} ${pnl?`(${pnl}%)`:''}</span></div>`;
-      }).join(''); updateStats();
-    }
-    function updateStats() {
-      const trades = loadTrades(), closedTrades = trades.filter(t => t.exit);
-      document.getElementById('total-trades').textContent = trades.length;
-      if (closedTrades.length > 0) {
-        const wins = closedTrades.filter(t => (t.exit-t.entry)/t.entry*100*(t.type==='BUY'?1:-1) > 0).length;
-        document.getElementById('win-rate').textContent = `${(wins/closedTrades.length*100).toFixed(1)}%`;
-        const totalPnl = closedTrades.reduce((sum,t) => sum + ((t.exit-t.entry)/t.entry*100*(t.type==='BUY'?1:-1)), 0);
-        document.getElementById('total-pnl').textContent = `${totalPnl>=0?'+':''}${totalPnl.toFixed(2)}%`;
-        document.getElementById('total-pnl').style.color = totalPnl>=0?'var(--neon-green)':'var(--neon-red)';
-      }
-    }
-
-    // ================= AUTO-REFRESH =================
-    let countdown = CONFIG.refreshMs/1000;
-    setInterval(() => { countdown--; document.getElementById('status').textContent = `Next update in ${countdown}s`;
-      if (countdown <= 0) { fetchAllSignals(); countdown = CONFIG.refreshMs/1000; }}, 1000);
-
-    // ================= INITIALIZATION =================
-    document.addEventListener('DOMContentLoaded', () => {
-      renderAssets(); renderTrades(); fetchAllSignals();
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      render();
+      setTimeout(connect, 1000);
     });
   </script>
 </body>
