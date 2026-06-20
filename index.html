@@ -10,12 +10,12 @@
     *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,monospace}
     body{background:#050810;color:#e0e6ed;min-height:100vh;padding:1rem;padding-bottom:90px}
     .header{text-align:center;padding:1.5rem 0;border-bottom:1px solid #1e293b;margin-bottom:1rem}
-    .logo{font-size:1.6rem;font-weight:900;background:linear-gradient(90deg,#00ff88,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .subtitle{font-size:0.75rem;color:#6b7280;margin-top:0.3rem}
-    .status{margin-top:0.5rem;padding:0.3rem 0.8rem;border-radius:20px;display:inline-block;font-size:0.8rem;font-weight:600}
+    .logo{font-size:1.5rem;font-weight:900;background:linear-gradient(90deg,#00ff88,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{font-size:0.7rem;color:#6b7280;margin-top:0.3rem}
+    .status{margin-top:0.5rem;padding:0.3rem 0.8rem;border-radius:20px;display:inline-block;font-size:0.75rem;font-weight:600}
     .status.connected{background:rgba(0,255,136,0.15);color:#00ff88}
     .status.disconnected{background:rgba(255,51,102,0.15);color:#ff3366}
-    .counter{font-size:0.75rem;color:#6b7280;margin-top:0.5rem}
+    .msg-count{font-size:0.65rem;color:#6b7280;margin-top:0.3rem}
     .card{background:#0a0f1c;border:1px solid #1e293b;border-radius:12px;padding:1rem;margin-bottom:1rem}
     .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem}
     .name{font-size:1.1rem;font-weight:700}
@@ -25,81 +25,89 @@
     .box{background:rgba(30,41,59,0.5);padding:0.6rem;border-radius:8px;text-align:center}
     .label{font-size:0.65rem;color:#6b7280;text-transform:uppercase;margin-bottom:0.2rem}
     .value{font-size:0.95rem;font-weight:700}
-    .signal{margin-top:0.8rem;padding:0.9rem;border-radius:10px;text-align:center;font-weight:800;font-size:1rem;border:2px solid}
+    .rsi-zone{font-size:0.7rem;margin-top:0.2rem;font-weight:600}
+    .rsi-zone.oversold{color:#00ff88}
+    .rsi-zone.overbought{color:#ff3366}
+    .rsi-zone.neutral{color:#6b7280}
+    .vol-bar{height:4px;background:#1e293b;border-radius:2px;margin-top:0.3rem;overflow:hidden}
+    .vol-fill{height:100%;background:#00d4ff;transition:width 0.3s}
+    .vol-fill.high{background:#00ff88}
+    .vol-fill.low{background:#ff3366}
+    .signal{margin-top:0.8rem;padding:0.9rem;border-radius:10px;text-align:center;font-weight:800;font-size:0.95rem;border:2px solid}
     .signal.buy{background:rgba(0,255,136,0.1);color:#00ff88;border-color:#00ff88}
     .signal.sell{background:rgba(255,51,102,0.1);color:#ff3366;border-color:#ff3366}
     .signal.neutral{background:rgba(255,149,0,0.05);color:#ff9500;border-color:#ff9500}
+    .signal.strong-buy{background:rgba(0,255,136,0.2);color:#00ff88;border-color:#00ff88;box-shadow:0 0 15px rgba(0,255,136,0.3)}
+    .signal.strong-sell{background:rgba(255,51,102,0.2);color:#ff3366;border-color:#ff3366;box-shadow:0 0 15px rgba(255,51,102,0.3)}
+    .indicator-scores{margin-top:0.5rem;padding:0.5rem;background:rgba(30,41,59,0.3);border-radius:6px}
+    .score-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;font-size:0.7rem;margin-top:0.3rem}
+    .score-item{display:flex;justify-content:space-between}
     .nav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,15,28,0.98);backdrop-filter:blur(10px);border-top:1px solid #1e293b;display:flex;justify-content:space-around;padding:0.7rem 0 calc(0.7rem + env(safe-area-inset-bottom));z-index:100}
     .nav-item{text-align:center;font-size:0.7rem;color:#6b7280;cursor:pointer}
     .nav-item.active{color:#00d4ff}
     .nav-icon{font-size:1.2rem;margin-bottom:0.1rem}
   </style>
-</head>
-<body>
+</head><body>
   <div class="header">
     <div class="logo">⚡ CVD SCALPER PRO</div>
-    <div class="subtitle">Real-Time Trade Flow Analysis</div>
+    <div class="subtitle">Dynamic Volume-Weighted Signals</div>
     <div class="status disconnected" id="status">Connecting...</div>
-    <div class="counter" id="msg-counter">Messages: 0</div>
+    <div class="msg-count" id="msg-count">Messages: 0 | Candles: 0</div>
   </div>
 
   <div id="cards"></div>
 
   <div class="nav">
     <div class="nav-item active"><div class="nav-icon">📊</div>Signals</div>
-    <div class="nav-item"><div class="nav-icon">📝</div>Trades</div>    <div class="nav-item"><div class="nav-icon">📈</div>Stats</div>
+    <div class="nav-item"><div class="nav-icon">📝</div>Trades</div>
+    <div class="nav-item"><div class="nav-icon">📈</div>Stats</div>
   </div>
 
   <script>
     const CONFIG = {
       symbols: ['BTCUSDT', 'ETHUSDT'],
-      wsUrl: 'wss://stream.binance.com:9443/stream?streams=btcusdt@trade/ethusdt@trade'
+      wsUrl: 'wss://stream.binance.com:9443/stream?streams=btcusdt@trade/ethusdt@trade/btcusdt@kline_1m/ethusdt@kline_1m',
+      rsiPeriod: 14,
+      volPeriod: 20
     };
 
     let ws = null;
-    let msgCount = 0;
-    let data = {
-      'BTCUSDT': { price: 0, cvd: 0, trades: 0, vwap: 0, cumVP: 0, cumV: 0, score: 0, signal: 'NEUTRAL' },
-      'ETHUSDT': { price: 0, cvd: 0, trades: 0, vwap: 0, cumVP: 0, cumV: 0, score: 0, signal: 'NEUTRAL' }
-    };
+    let msgCount = 0, candleCount = 0;
+    let data = {};
+
+    CONFIG.symbols.forEach(sym => {
+      data[sym] = {
+        price: 0, cvd: 0, trades: 0, vwap: 0, cumVP: 0, cumV: 0,
+        closes: [], volumes: [],
+        rsi: 50, volAvg: 0, volRatio: 1,
+        score: 0, signal: 'WAITING', confidence: 0,
+        cvdHistory: [], indicatorScores: {}, volumeMultiplier: 1
+      };
+    });
 
     function connect() {
       const status = document.getElementById('status');
       status.textContent = 'Connecting...';
-      
-      console.log('Connecting to:', CONFIG.wsUrl);
       ws = new WebSocket(CONFIG.wsUrl);
 
       ws.onopen = () => {
-        console.log('WebSocket Connected');
         status.textContent = '● LIVE';
         status.className = 'status connected';
         fetchPrices();
       };
 
-      ws.onmessage = (event) => {
-        try {
+      ws.onmessage = (event) => {        try {
           const raw = JSON.parse(event.data);
-          console.log('Raw Message:', raw); // Debug log
-          
-          // Binance combined stream format: { stream: "btcusdt@trade", data: { ... } }
+          msgCount++;
           if (raw.stream && raw.data) {
-            handleTrade(raw.data);
-          } 
-          // Direct stream format (fallback)
-          else if (raw.e === 'trade') {
-            handleTrade(raw);
+            if (raw.stream.includes('@trade')) handleTrade(raw.data);
+            else if (raw.stream.includes('@kline')) handleKline(raw.data);
           }
-        } catch (e) {
-          console.error('Parse error:', e);
-        }
+          document.getElementById('msg-count').textContent = `Messages: ${msgCount} | Candles: ${candleCount}`;
+        } catch (e) { console.error('Parse error:', e); }
       };
 
-      ws.onerror = (err) => {
-        console.error('WS Error:', err);        status.textContent = '● ERROR';
-        status.className = 'status disconnected';
-      };
-
+      ws.onerror = () => { status.textContent = '● ERROR'; status.className = 'status disconnected'; };
       ws.onclose = () => {
         status.textContent = '● RECONNECTING...';
         status.className = 'status disconnected';
@@ -108,68 +116,281 @@
     }
 
     function handleTrade(t) {
-      const symbol = t.s; // e.g., "BTCUSDT"
+      const symbol = t.s;
       if (!data[symbol]) return;
 
       const price = parseFloat(t.p);
       const qty = parseFloat(t.q);
-      const isBuyerMaker = t.m; // true = seller initiated, false = buyer initiated
+      const isBuyerMaker = t.m;
 
-      // Update Data
       data[symbol].price = price;
       data[symbol].trades++;
-      msgCount++;
-      
-      // CVD: If buyer is maker (t.m=true), it's a sell order hitting the book -> Negative CVD
-      // If buyer is NOT maker (t.m=false), it's a buy order hitting the book -> Positive CVD
       data[symbol].cvd += isBuyerMaker ? -qty : qty;
-      
-      // VWAP
       data[symbol].cumVP += price * qty;
       data[symbol].cumV += qty;
       data[symbol].vwap = data[symbol].cumV > 0 ? data[symbol].cumVP / data[symbol].cumV : price;
 
-      // Simple Signal Logic
-      const score = (data[symbol].cvd > 0 ? 1 : -1) + (price > data[symbol].vwap ? 1 : -1);
-      data[symbol].score = score;
-      data[symbol].signal = score >= 2 ? 'BUY' : score <= -2 ? 'SELL' : 'NEUTRAL';
-
-      // Update UI
-      document.getElementById('msg-counter').textContent = `Messages: ${msgCount}`;
+      updateSignal(symbol);
       render();
+    }
+
+    function handleKline(k) {
+      const symbol = k.s;
+      if (!data[symbol] || !k.x) return;
+
+      candleCount++;
+      const close = parseFloat(k.c);
+      const vol = parseFloat(k.v);
+
+      data[symbol].closes.push(close);
+      data[symbol].volumes.push(vol);
+
+      if (data[symbol].closes.length > 50) {        data[symbol].closes.shift();
+        data[symbol].volumes.shift();
+      }
+
+      calculateRSI(symbol);
+      calculateVolume(symbol);
+      updateSignal(symbol);
+      render();
+    }
+
+    function calculateRSI(sym) {
+      const d = data[sym];
+      const closes = d.closes;
+      const period = CONFIG.rsiPeriod;
+      if (closes.length < period + 1) { d.rsi = 50; return; }
+
+      let gains = 0, losses = 0;
+      for (let i = 1; i <= period; i++) {
+        const diff = closes[closes.length - i] - closes[closes.length - i - 1];
+        diff >= 0 ? gains += diff : losses -= diff;
+      }
+      let avgGain = gains / period, avgLoss = losses / period;
+      for (let i = period + 1; i < closes.length; i++) {
+        const diff = closes[i] - closes[i-1];
+        avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
+        avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
+      }
+      const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+      d.rsi = 100 - (100 / (1 + rs));
+    }
+
+    function calculateVolume(sym) {
+      const d = data[sym];
+      const vols = d.volumes;
+      const period = CONFIG.volPeriod;
+      if (vols.length < period) {
+        d.volAvg = vols.reduce((a,b)=>a+b,0)/vols.length;
+      } else {
+        d.volAvg = vols.slice(-period).reduce((a,b)=>a+b,0)/period;
+      }
+      d.volRatio = d.volAvg > 0 ? vols[vols.length-1] / d.volAvg : 1;
+    }
+
+    function updateSignal(sym) {
+      const d = data[sym];
+      const m = marketData[sym] || {};
+      
+      // === 1. CALCULATE INDIVIDUAL SCORES ===
+      let scores = {
+        cvd: 0,        vwap: 0,
+        rsi: 0,
+        volume: 0,
+        funding: 0,
+        momentum: 0
+      };
+      
+      // CVD Score (-2 to +2)
+      if (Math.abs(d.cvd) > 50) scores.cvd = d.cvd > 0 ? 2 : -2;
+      else if (Math.abs(d.cvd) > 20) scores.cvd = d.cvd > 0 ? 1.5 : -1.5;
+      else if (Math.abs(d.cvd) > 5) scores.cvd = d.cvd > 0 ? 1 : -1;
+      else scores.cvd = d.cvd > 0 ? 0.3 : -0.3;
+      
+      // VWAP Score (-1.5 to +1.5)
+      const vwapDist = (d.price - d.vwap) / d.vwap * 100;
+      if (Math.abs(vwapDist) > 0.3) scores.vwap = d.price > d.vwap ? 1.5 : -1.5;
+      else if (Math.abs(vwapDist) > 0.1) scores.vwap = d.price > d.vwap ? 1 : -1;
+      else scores.vwap = d.price > d.vwap ? 0.5 : -0.5;
+      
+      // RSI Score (-1.5 to +1.5)
+      if (d.rsi < 25) scores.rsi = 1.5;
+      else if (d.rsi < 35) scores.rsi = 1;
+      else if (d.rsi < 45) scores.rsi = 0.5;
+      else if (d.rsi < 55) scores.rsi = 0;
+      else if (d.rsi < 65) scores.rsi = -0.5;
+      else if (d.rsi < 75) scores.rsi = -1;
+      else scores.rsi = -1.5;
+      
+      // Volume Score (-2 to +2)
+      if (d.volRatio > 2.5) scores.volume = 2;
+      else if (d.volRatio > 1.8) scores.volume = 1.5;
+      else if (d.volRatio > 1.2) scores.volume = 1;
+      else if (d.volRatio > 0.8) scores.volume = 0.5;
+      else if (d.volRatio > 0.5) scores.volume = -0.5;
+      else scores.volume = -1.5;
+      
+      // Funding Rate Score (-1 to +1)
+      if (m.fundingRate > 0.02) scores.funding = -1;
+      else if (m.fundingRate > 0.01) scores.funding = -0.5;
+      else if (m.fundingRate < -0.01) scores.funding = 1;
+      else if (m.fundingRate < -0.005) scores.funding = 0.5;
+      else scores.funding = 0;
+      
+      // Momentum Score (CVD change) (-1.5 to +1.5)
+      if (d.cvdHistory && d.cvdHistory.length > 0) {
+        const cvdChange = d.cvd - d.cvdHistory[d.cvdHistory.length - 1];
+        if (cvdChange > 10) scores.momentum = 1.5;
+        else if (cvdChange > 5) scores.momentum = 1;
+        else if (cvdChange > 2) scores.momentum = 0.5;
+        else if (cvdChange < -10) scores.momentum = -1.5;        else if (cvdChange < -5) scores.momentum = -1;
+        else if (cvdChange < -2) scores.momentum = -0.5;
+        else scores.momentum = 0;
+      }
+      
+      // Store CVD history
+      if (!d.cvdHistory) d.cvdHistory = [];
+      d.cvdHistory.push(d.cvd);
+      if (d.cvdHistory.length > 3) d.cvdHistory.shift();
+      
+      // === 2. CALCULATE VOLUME MULTIPLIER ===
+      let volumeMultiplier = 1.0;
+      let confidenceBoost = 0;
+      
+      if (d.volRatio > 2.0) {
+        volumeMultiplier = 0.6;
+        confidenceBoost = 20;
+      } else if (d.volRatio > 1.5) {
+        volumeMultiplier = 0.75;
+        confidenceBoost = 10;
+      } else if (d.volRatio > 1.2) {
+        volumeMultiplier = 0.9;
+        confidenceBoost = 5;
+      } else if (d.volRatio > 0.8) {
+        volumeMultiplier = 1.1;
+        confidenceBoost = -10;
+      } else if (d.volRatio > 0.5) {
+        volumeMultiplier = 1.4;
+        confidenceBoost = -25;
+      } else {
+        volumeMultiplier = 1.8;
+        confidenceBoost = -40;
+      }
+      
+      // === 3. CALCULATE RAW & WEIGHTED SCORE ===
+      const rawScore = 
+        scores.cvd * 2.0 +
+        scores.vwap * 1.5 +
+        scores.rsi * 1.0 +
+        scores.volume * 2.5 +
+        scores.funding * 0.8 +
+        scores.momentum * 1.2;
+      
+      const weightedScore = rawScore;
+      
+      // === 4. DYNAMIC THRESHOLDS ===
+      const buyThreshold = 4.0 * volumeMultiplier;
+      const sellThreshold = -4.0 * volumeMultiplier;
+      const strongBuyThreshold = 7.0 * volumeMultiplier;
+      const strongSellThreshold = -7.0 * volumeMultiplier;      
+      // === 5. GENERATE SIGNAL ===
+      let signal, signalClass;
+      
+      if (weightedScore >= strongBuyThreshold) {
+        signal = 'STRONG BUY 🔥';
+        signalClass = 'strong-buy';
+      } else if (weightedScore >= buyThreshold) {
+        signal = 'BUY';
+        signalClass = 'buy';
+      } else if (weightedScore <= strongSellThreshold) {
+        signal = 'STRONG SELL 🔥';
+        signalClass = 'strong-sell';
+      } else if (weightedScore <= sellThreshold) {
+        signal = 'SELL';
+        signalClass = 'sell';
+      } else {
+        signal = 'NEUTRAL ⏸️';
+        signalClass = 'neutral';
+      }
+      
+      // === 6. CALCULATE CONFIDENCE ===
+      const maxScore = 12;
+      const baseConfidence = (Math.abs(weightedScore) / maxScore) * 100;
+      d.confidence = Math.max(0, Math.min(100, baseConfidence + confidenceBoost));
+      
+      // === 7. STORE RESULTS ===
+      d.score = weightedScore;
+      d.signal = signal;
+      d.signalClass = signalClass;
+      d.indicatorScores = scores;
+      d.volumeMultiplier = volumeMultiplier;
+    }
+
+    function render() {
+      const container = document.getElementById('cards');
+      container.innerHTML = Object.entries(data).map(([sym, d]) => {
+        const rsiClass = d.rsi < 30 ? 'oversold' : d.rsi > 70 ? 'overbought' : 'neutral';
+        const rsiText = d.rsi < 30 ? 'OVERSOLD' : d.rsi > 70 ? 'OVERBOUGHT' : 'NEUTRAL';
+        const volWidth = Math.min(100, d.volRatio * 50);
+        const volColor = d.volRatio > 1.5 ? '#00ff88' : d.volRatio < 0.7 ? '#ff3366' : '#00d4ff';
+        const volClass = d.volRatio > 1.5 ? 'high' : d.volRatio < 1.2 ? 'low' : '';
+        const sigClass = d.signalClass || 'neutral';
+
+        return `
+          <div class="card">
+            <div class="row">
+              <div class="name">${sym}</div>
+              <div class="price ${d.price > d.vwap ? 'up' : 'down'}">$${d.price.toLocaleString()}</div>
+            </div>            <div class="grid">
+              <div class="box">
+                <div class="label">CVD</div>
+                <div class="value" style="color:${d.cvd > 0 ? '#00ff88' : '#ff3366'}">${d.cvd.toFixed(2)}</div>
+              </div>
+              <div class="box">
+                <div class="label">VWAP</div>
+                <div class="value">$${d.vwap.toFixed(0)}</div>
+              </div>
+              <div class="box">
+                <div class="label">RSI (14)</div>
+                <div class="value" style="color:${rsiClass === 'oversold' ? '#00ff88' : rsiClass === 'overbought' ? '#ff3366' : '#e0e6ed'}">${d.rsi.toFixed(1)}</div>
+                <div class="rsi-zone ${rsiClass}">${rsiText}</div>
+              </div>
+              <div class="box">
+                <div class="label">VOL RATIO</div>
+                <div class="value">${d.volRatio.toFixed(2)}x</div>
+                <div class="vol-bar"><div class="vol-fill ${volClass}" style="width:${volWidth}%;background:${volColor}"></div></div>
+              </div>
+            </div>
+            <div class="indicator-scores">
+              <div style="font-size:0.65rem;color:#6b7280">Indicator Scores:</div>
+              <div class="score-grid">
+                <div class="score-item"><span>CVD:</span><span style="color:${d.indicatorScores.cvd>0?'#00ff88':'#ff3366'}">${(d.indicatorScores.cvd||0).toFixed(1)}</span></div>
+                <div class="score-item"><span>VWAP:</span><span style="color:${d.indicatorScores.vwap>0?'#00ff88':'#ff3366'}">${(d.indicatorScores.vwap||0).toFixed(1)}</span></div>
+                <div class="score-item"><span>RSI:</span><span style="color:${d.indicatorScores.rsi>0?'#00ff88':'#ff3366'}">${(d.indicatorScores.rsi||0).toFixed(1)}</span></div>
+                <div class="score-item"><span>VOL:</span><span style="color:${d.indicatorScores.volume>0?'#00ff88':'#ff3366'}">${(d.indicatorScores.volume||0).toFixed(1)}</span></div>
+              </div>
+            </div>
+            <div class="signal ${sigClass}">${d.signal}</div>
+            <div style="text-align:center;font-size:0.75rem;color:#6b7280;margin-top:0.5rem">
+              Score: ${d.score.toFixed(1)} | Threshold: ${(4.0*d.volumeMultiplier).toFixed(1)} | Confidence: ${d.confidence.toFixed(0)}%
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     async function fetchPrices() {
       try {
         const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=["BTCUSDT","ETHUSDT"]');
         const prices = await res.json();
-        prices.forEach(p => {
-          if (data[p.symbol]) data[p.symbol].price = parseFloat(p.price);
-        });        render();
-      } catch (e) { console.error(e); }
+        prices.forEach(p => { if (data[p.symbol]) data[p.symbol].price = parseFloat(p.price); });
+        render();
+      } catch (e) { console.warn('REST fallback failed'); }
     }
 
-    function render() {
-      const container = document.getElementById('cards');
-      container.innerHTML = Object.entries(data).map(([sym, d]) => `
-        <div class="card">
-          <div class="row">
-            <div class="name">${sym}</div>
-            <div class="price ${d.price > d.vwap ? 'up' : 'down'}">$${d.price.toFixed(2)}</div>
-          </div>
-          <div class="grid">
-            <div class="box"><div class="label">CVD</div><div class="value">${d.cvd.toFixed(2)}</div></div>
-            <div class="box"><div class="label">VWAP</div><div class="value">$${d.vwap.toFixed(0)}</div></div>
-            <div class="box"><div class="label">Trades</div><div class="value">${d.trades}</div></div>
-            <div class="box"><div class="label">Score</div><div class="value">${d.score.toFixed(0)}</div></div>
-          </div>
-          <div class="signal ${d.signal.toLowerCase()}">${d.signal}</div>
-        </div>
-      `).join('');
-    }
+    let marketData = {};
 
-    window.addEventListener('DOMContentLoaded', () => {
-      render();
+    window.addEventListener('DOMContentLoaded', () => {      render();
       connect();
     });
   </script>
