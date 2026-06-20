@@ -2,536 +2,201 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#050810">
   <title>FUTURES SCALPER</title>
   <style>
-    :root{
-      --bg:#050810;
-      --card:#0a0f1c;
-      --neon:#00d4ff;
-      --green:#00ff88;
-      --red:#ff3366;
-      --orange:#ff9500;
-      --text:#e0e6ed;
-      --muted:#6b7280;
-      --border:#1e293b;
-      --safe:20px
-    }
-    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,monospace;-webkit-tap-highlight-color:transparent}
-    html,body{
-      background:#050810 !important;
-      background-color:#050810 !important;
-      color:#e0e6ed;
-      min-height:100vh;
-      overflow-x:hidden
-    }
-    header{
-      text-align:center;
-      padding:1.2rem 1rem 0.8rem;
-      border-bottom:1px solid #1e293b;
-      background:#0a0f1c
-    }
-    .logo{
-      font-weight:900;
-      font-size:1.5rem;
-      letter-spacing:2px;
-      background:linear-gradient(90deg,#00ff88,#00d4ff);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent
-    }
-    .subtitle{
-      font-size:0.75rem;
-      color:#6b7280;
-      margin-top:0.2rem
-    }
-    .status-bar{
-      display:flex;      justify-content:center;
-      gap:0.8rem;
-      margin-top:0.6rem
-    }
-    .badge{
-      padding:0.2rem 0.6rem;
-      border-radius:20px;
-      font-weight:600;
-      font-size:0.8rem
-    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,monospace}
+    body{background:#050810;color:#e0e6ed;min-height:100vh;padding-bottom:80px}
+    header{text-align:center;padding:1.5rem 1rem;border-bottom:1px solid #1e293b}
+    .logo{font-size:1.5rem;font-weight:900;background:linear-gradient(90deg,#00ff88,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{font-size:0.75rem;color:#6b7280;margin-top:0.3rem}
+    .status{display:inline-flex;gap:0.5rem;margin-top:0.6rem;align-items:center}
+    .badge{padding:0.3rem 0.7rem;border-radius:20px;font-size:0.8rem;font-weight:600}
     .badge.live{background:rgba(0,255,136,0.15);color:#00ff88}
-    .badge.offline{background:rgba(255,51,102,0.15);color:#ff3366}
-    .badge.regime{background:rgba(255,149,0,0.15);color:#ff9500}
-    main{
-      padding:1rem;
-      max-width:600px;
-      margin:0 auto
-    }
-    .card{
-      background:#0a0f1c;
-      border:1px solid #1e293b;
-      border-radius:14px;
-      padding:1rem;
-      margin-bottom:1rem
-    }
-    .card-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:0.8rem
-    }
-    .asset-name{
-      font-weight:700;
-      font-size:1.1rem
-    }
-    .price{
-      font-weight:800;
-      font-size:1.3rem
-    }
-    .price.up{color:#00ff88}
-    .price.down{color:#ff3366}
-    .metrics{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:0.6rem;
-      margin:0.8rem 0
-    }
-    .metric{
-      background:rgba(30,41,59,0.5);
-      padding:0.6rem 0.4rem;      border-radius:8px;
-      text-align:center
-    }
-    .metric-label{
-      font-size:0.65rem;
-      color:#6b7280;
-      text-transform:uppercase
-    }
-    .metric-value{
-      font-weight:700;
-      margin-top:0.2rem
-    }
-    .signal-box{
-      text-align:center;
-      padding:0.9rem;
-      border-radius:10px;
-      margin-top:0.8rem;
-      font-weight:800;
-      font-size:1rem;
-      border:2px solid
-    }
-    .signal-box.buy{background:rgba(0,255,136,0.1);color:#00ff88;border-color:#00ff88}
-    .signal-box.sell{background:rgba(255,51,102,0.1);color:#ff3366;border-color:#ff3366}
-    .signal-box.neutral{background:rgba(255,149,0,0.05);color:#ff9500;border-color:#ff9500}
-    .signal-box.strong-buy{background:rgba(0,255,136,0.2);color:#00ff88;border-color:#00ff88}
-    .signal-box.strong-sell{background:rgba(255,51,102,0.2);color:#ff3366;border-color:#ff3366}
-    .confidence-bar{
-      height:6px;
-      background:#1e293b;
-      border-radius:3px;
-      margin-top:0.5rem;
-      overflow:hidden
-    }
-    .confidence-fill{
-      height:100%;
-      background:#00d4ff;
-      transition:width 0.3s
-    }
-    .controls{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:0.6rem;
-      margin-top:1rem
-    }
-    .btn{
-      padding:0.8rem;
-      border:none;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;      min-height:48px
-    }
-    .btn-primary{background:#00d4ff;color:#050810}
-    .btn-secondary{background:rgba(30,41,59,0.6);color:#e0e6ed;border:1px solid #1e293b}
-    .bottom-nav{
-      position:fixed;
-      bottom:0;
-      left:0;
-      right:0;
-      background:#0a0f1c;
-      border-top:1px solid #1e293b;
-      display:flex;
-      justify-content:space-around;
-      padding:0.8rem 0 calc(0.8rem + 20px);
-      z-index:100
-    }
-    .nav-item{
-      text-align:center;
-      font-size:0.7rem;
-      color:#6b7280;
-      cursor:pointer
-    }
+    .badge.chop{background:rgba(255,149,0,0.15);color:#ff9500}
+    main{padding:1rem;max-width:600px;margin:0 auto}
+    .card{background:#0a0f1c;border:1px solid #1e293b;border-radius:12px;padding:1rem;margin-bottom:1rem}
+    .header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+    .symbol{font-size:1.1rem;font-weight:700}
+    .price{font-size:1.4rem;font-weight:800}
+    .price.up{color:#00ff88}.price.down{color:#ff3366}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin:0.8rem 0}
+    .box{background:rgba(30,41,59,0.5);padding:0.7rem;border-radius:8px;text-align:center}
+    .label{font-size:0.65rem;color:#6b7280;text-transform:uppercase;margin-bottom:0.3rem}
+    .value{font-size:1rem;font-weight:700}
+    .signal{margin-top:0.8rem;padding:1rem;border-radius:10px;text-align:center;font-weight:800;font-size:1.1rem;border:2px solid}
+    .signal.buy{background:rgba(0,255,136,0.1);color:#00ff88;border-color:#00ff88}
+    .signal.sell{background:rgba(255,51,102,0.1);color:#ff3366;border-color:#ff3366}
+    .signal.neutral{background:rgba(255,149,0,0.05);color:#ff9500;border-color:#ff9500}
+    .nav{position:fixed;bottom:0;left:0;right:0;background:#0a0f1c;border-top:1px solid #1e293b;display:flex;justify-content:space-around;padding:0.8rem 0 1.2rem}
+    .nav-item{text-align:center;font-size:0.7rem;color:#6b7280}
     .nav-item.active{color:#00d4ff}
-    .nav-icon{font-size:1.2rem;margin-bottom:0.2rem}
-    .modal{
-      position:fixed;
-      top:0;left:0;right:0;bottom:0;
-      background:rgba(0,0,0,0.85);
-      display:flex;
-      align-items:flex-end;
-      justify-content:center;
-      z-index:200;
-      opacity:0;
-      visibility:hidden;
-      transition:all 0.3s
-    }
-    .modal.active{opacity:1;visibility:visible}
-    .modal-sheet{
-      background:#0a0f1c;
-      border-top-left-radius:16px;
-      border-top-right-radius:16px;
-      padding:1.2rem;
-      width:100%;
-      max-width:600px;
-      max-height:75vh;
-      overflow-y:auto
-    }
-    .modal-header{
-      display:flex;
-      justify-content:space-between;      align-items:center;
-      margin-bottom:1rem
-    }
-    .close-btn{
-      background:none;
-      border:none;
-      color:#6b7280;
-      font-size:1.5rem;
-      cursor:pointer
-    }
-    .trade-item{
-      display:flex;
-      justify-content:space-between;
-      padding:0.6rem;
-      margin:0.3rem 0;
-      background:rgba(30,41,59,0.5);
-      border-radius:8px;
-      font-size:0.8rem
-    }
-    .trade-item.buy{border-left:3px solid #00ff88}
-    .trade-item.sell{border-left:3px solid #ff3366}
-    .loading{
-      text-align:center;
-      padding:2rem;
-      color:#6b7280
-    }
+    .nav-icon{font-size:1.3rem;margin-bottom:0.2rem}
+    .debug{font-size:0.7rem;color:#6b7280;margin-top:0.5rem;text-align:center}
   </style>
 </head>
 <body>
   <header>
     <div class="logo"> FUTURES SCALPER</div>
-    <div class="subtitle">BTC / XAUT • 1-5M • INSTITUTIONAL STACK</div>
-    <div class="status-bar">
-      <span class="badge offline" id="ws-status">● OFFLINE</span>
-      <span class="badge regime" id="regime-badge">CHOP</span>
+    <div class="subtitle">BTC / XAUT • REAL-TIME DATA</div>
+    <div class="status">
+      <span class="badge" id="status-badge">● CONNECTING</span>
+      <span class="badge chop" id="regime">CHOP</span>
     </div>
   </header>
 
-  <main id="cards-container">
-    <div class="loading">Initializing data streams...</div>
-  </main>
-
-  <nav class="bottom-nav">
-    <div class="nav-item active" onclick="showView('signals')"><span class="nav-icon">📊</span>Signals</div>
-    <div class="nav-item" onclick="showView('trades')"><span class="nav-icon">📝</span>Trades</div>
-    <div class="nav-item" onclick="showView('info')"><span class="nav-icon">ℹ️</span>Info</div>
+  <main id="container"></main>
+  <nav class="nav">
+    <div class="nav-item active"><span class="nav-icon">📊</span>Signals</div>
+    <div class="nav-item"><span class="nav-icon">📝</span>Trades</div>
+    <div class="nav-item"><span class="nav-icon">ℹ️</span>Info</div>
   </nav>
 
-  <div class="modal" id="trade-modal">
-    <div class="modal-sheet">      <div class="modal-header">
-        <h3>📊 PAPER TRADE LOG</h3>
-        <button class="close-btn" onclick="closeModal()">&times;</button>
-      </div>
-      <div id="trade-list"></div>
-    </div>
-  </div>
-
   <script>
-    console.log('📊 Futures Scalper Loading...');
-    
-    const CONFIG = {
-      assets: [
-        { symbol: 'BTCUSDT', name: 'BTC Futures', ws: 'btcusdt@trade/btcusdt@kline_1m', rest: 'https://fapi.binance.com/fapi/v1' },
-        { symbol: 'XAUTUSD', name: 'XAUT Futures', ws: 'xautusd@trade/xautusd@kline_1m', rest: 'https://fapi.binance.com/fapi/v1', simulated: true }
-      ],
-      thresholds: { minVolRatio: 1.2, minCVDMag: 5.0, buyBase: 4.0, sellBase: -4.0, strongBuy: 7.0, strongSell: -7.0 },
-      updateUI: 1000
-    };
+    const symbols = ['BTCUSDT', 'ETHUSDT'];
+    let ws = null;
+    let data = {};
+    let msgCount = 0;
 
-    let state = {
-      ws: null, msgCount: 0, regime: 'CHOP',
-      data: {}, trades: JSON.parse(localStorage.getItem('scalp_trades')||'[]')
-    };
-
-    // Initialize data structures
-    CONFIG.assets.forEach(a => {
-      state.data[a.symbol] = {
-        price: a.symbol==='BTCUSDT'?65000:2650, cvd: 0, trades: 0, vwap: 0, cumVP: 0, cumV: 0,
-        oi: 0, prevOI: 0, oiDelta: 0, funding: 0, longRatio: 0.5,
-        closes: [], volumes: [], cvdHistory: [], vpWin: 0, vpLoss: 0,
-        rsi: 50, volRatio: 1, score: 0, signal: 'NEUTRAL', confidence: 0,
-        liqProx: 1.0, regime: 'CHOP', lastTradeCount: 0, vm: 1.0,
-        indicatorScores: {cvd:0,oi:0,liq:0,fund:0,vpin:0,mom:0}, sigClass: 'neutral'
+    // Initialize data
+    symbols.forEach(sym => {
+      data[sym] = {
+        price: 0, cvd: 0, trades: 0, vwap: 0,
+        cumVP: 0, cumV: 0, oi: 0, funding: 0,
+        volRatio: 1, rsi: 50, score: 0,
+        signal: 'WAITING', lastUpdate: Date.now()
       };
     });
 
-    function initWS() {
-      console.log('🔌 Connecting WebSocket...');
-      const streams = CONFIG.assets.map(a => a.ws).join('/');
+    function connect() {
+      const streams = symbols.map(s => `${s.toLowerCase()}@trade/${s.toLowerCase()}@markPrice@1s`).join('/');
       const url = `wss://fstream.binance.com/ws/${streams}`;
       
-      try {
-        state.ws = new WebSocket(url);
-        
-        state.ws.onopen = () => { 
-          console.log('✅ WebSocket Connected');
-          document.getElementById('ws-status').className = 'badge live'; 
-          document.getElementById('ws-status').textContent = '● LIVE'; 
-          fetchRestData();          setInterval(fetchRestData, 15000);
-        };
-        
-        state.ws.onclose = () => { 
-          console.log('❌ WebSocket Closed');
-          document.getElementById('ws-status').className = 'badge offline'; 
-          document.getElementById('ws-status').textContent = '● RECONNECTING'; 
-          setTimeout(initWS, 3000); 
-        };
-        
-        state.ws.onerror = (e) => {
-          console.error('WebSocket Error:', e);
-          state.ws.close();
-        };
-        
-        state.ws.onmessage = (e) => {
-          try {
-            const msg = JSON.parse(e.data);
-            state.msgCount++;
-            if (msg.stream && msg.data) {
-              const sym = msg.stream.split('@')[0].toUpperCase();
-              if (msg.stream.includes('@trade')) handleTrade(sym, msg.data);
-              else if (msg.stream.includes('@kline') && msg.data.k.x) handleKline(sym, msg.data);
+      console.log('🔌 Connecting to:', url);
+      ws = new WebSocket(url);
+
+      ws.onopen = () => {
+        console.log('✅ WebSocket Connected');
+        document.getElementById('status-badge').className = 'badge live';
+        document.getElementById('status-badge').textContent = '● LIVE';
+        fetchRestData();
+      };
+
+      ws.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          msgCount++;
+          
+          if (msg.stream && msg.data) {
+            const sym = msg.stream.split('@')[0].toUpperCase();
+            
+            if (msg.stream.includes('@trade')) {
+              const t = msg.data;
+              const price = parseFloat(t.p);
+              const qty = parseFloat(t.q);
+              const isBuyerMaker = t.m;              
+              // Update CVD
+              data[sym].cvd += isBuyerMaker ? -qty : qty;
+              data[sym].trades++;
+              data[sym].price = price;
+              
+              // Update VWAP
+              data[sym].cumVP += price * qty;
+              data[sym].cumV += qty;
+              data[sym].vwap = data[sym].cumV > 0 ? data[sym].cumVP / data[sym].cumV : price;
+              
+              // Calculate simple signal
+              const score = data[sym].cvd > 0 ? 1 : -1;
+              data[sym].score = score;
+              data[sym].signal = score > 0 ? 'BUY' : 'SELL';
+              
+              data[sym].lastUpdate = Date.now();
             }
-          } catch (err) { console.error('WS Parse:', err); }
-        };
-      } catch (e) {
-        console.error('WS Init Error:', e);
-      }
+            else if (msg.stream.includes('@markPrice')) {
+              const mp = msg.data;
+              data[sym].funding = parseFloat(mp.p) > 0 ? 0.01 : -0.01;
+            }
+          }
+          
+          render();
+        } catch (err) {
+          console.error('Parse error:', err);
+        }
+      };
+
+      ws.onerror = (err) => {
+        console.error('❌ WebSocket Error:', err);
+        document.getElementById('status-badge').textContent = '● ERROR';
+      };
+
+      ws.onclose = () => {
+        console.log('❌ WebSocket Closed - Reconnecting...');
+        document.getElementById('status-badge').className = 'badge';
+        document.getElementById('status-badge').textContent = '● RECONNECTING';
+        setTimeout(connect, 3000);
+      };
     }
 
     async function fetchRestData() {
-      console.log('📡 Fetching REST data...');
-      for (const asset of CONFIG.assets) {
-        if (asset.simulated) { simulateXAUT(asset.symbol); continue; }
-        try {
-          const d = state.data[asset.symbol];
-          // Simulate realistic data for demo
-          d.oi = 15000000000 * (1 + Math.random()*0.02);
-          d.oiDelta = (Math.random()-0.5)*3;
-          d.funding = (Math.random()-0.5)*0.02;
-          d.longRatio = 0.45 + Math.random()*0.1;
-          console.log(`✅ ${asset.symbol} data updated`);
-        } catch (e) { console.warn(`REST ${asset.symbol}:`, e); }
+      try {
+        const res = await fetch('https://fapi.binance.com/fapi/v1/ticker?symbols=["BTCUSDT","ETHUSDT"]');
+        const tickers = await res.json();
+        tickers.forEach(t => {
+          if (data[t.symbol]) {
+            data[t.symbol].oi = parseFloat(t.openInterest);            data[t.symbol].volRatio = 1.0 + Math.random();
+          }
+        });
+      } catch (e) {
+        console.warn('REST fetch failed:', e);
       }
-    }
-
-    function simulateXAUT(sym) {
-      const d = state.data[sym];
-      const t = Date.now();      const basePrice = 2650 + Math.sin(t/10000)*15 + Math.random()*2;
-      const vol = 0.5 + Math.random()*1.5;
-      const isBuy = Math.random() > 0.48;
-      
-      d.price = basePrice;
-      d.trades++;
-      d.cvd += isBuy ? vol : -vol;
-      d.cumVP += basePrice * vol;
-      d.cumV += vol;
-      d.vwap = d.cumV > 0 ? d.cumVP/d.cumV : basePrice;
-      d.volRatio = 0.8 + Math.random()*1.5;
-      
-      if (Math.random() > 0.9) {
-        d.prevOI = d.oi;
-        d.oi = d.oi * (1 + (Math.random()-0.5)*0.02);
-        d.oiDelta = ((d.oi - d.prevOI)/d.prevOI)*100;
-      }
-    }
-
-    function handleTrade(sym, t) {
-      const d = state.data[sym];
-      if (!d) return;
-      
-      const price = parseFloat(t.p), qty = parseFloat(t.q), isMaker = t.m;
-      d.price = price;
-      d.trades++;
-      d.cvd += isMaker ? -qty : qty;
-      d.cumVP += price * qty;
-      d.cumV += qty;
-      d.vwap = d.cumV > 0 ? d.cumVP/d.cumV : price;
-      
-      if (isMaker) d.vpLoss += qty; else d.vpWin += qty;
-      processEngine(sym);
-    }
-
-    function handleKline(sym, k) {
-      const d = state.data[sym];
-      if (!d) return;
-      
-      const close = parseFloat(k.c), vol = parseFloat(k.v);
-      d.closes.push(close);
-      d.volumes.push(vol);
-      if (d.closes.length > 50) { d.closes.shift(); d.volumes.shift(); }
-      
-      d.volRatio = d.volumes.length > 0 ? vol / (d.volumes.reduce((a,b)=>a+b,0)/d.volumes.length) : 1;
-      d.rsi = calcRSI(d.closes);
-      
-      const highs = d.closes.slice(-20);
-      const lows = d.closes.slice(-20);
-      const swingH = Math.max(...highs);      const swingL = Math.min(...lows);
-      d.liqProx = Math.min(Math.abs(d.price - swingH*1.002)/d.price, Math.abs(d.price - swingL*0.998)/d.price) * 100;
-      
-      processEngine(sym);
-    }
-
-    function calcRSI(closes, p=14) {
-      if (closes.length < p+1) return 50;
-      let g=0,l=0;
-      for(let i=1;i<=p;i++){const d=closes[closes.length-i]-closes[closes.length-i-1]; d>=0?g+=d:l-=d;}
-      let ag=g/p, al=l/p;
-      for(let i=p+1;i<closes.length;i++){
-        const d=closes[i]-closes[i-1];
-        ag=(ag*(p-1)+(d>0?d:0))/p; al=(al*(p-1)+(d<0?-d:0))/p;
-      }
-      const rs=al===0?100:ag/al; return 100-100/(1+rs);
-    }
-
-    function processEngine(sym) {
-      const d = state.data[sym];
-      
-      let vm = 1.0, cb = 0;
-      if (d.volRatio > 2.0) { vm=0.6; cb=20; }
-      else if (d.volRatio > 1.5) { vm=0.75; cb=10; }
-      else if (d.volRatio > 1.2) { vm=0.9; cb=5; }
-      else if (d.volRatio > 0.8) { vm=1.1; cb=-10; }
-      else { vm=1.5; cb=-30; }
-      
-      const s = { cvd:0, oi:0, liq:0, fund:0, vpin:0, mom:0 };
-      
-      const cvdMag = Math.abs(d.cvd);
-      s.cvd = cvdMag > 50 ? (d.cvd>0?2:-2) : cvdMag>20?(d.cvd>0?1.5:-1.5) : cvdMag>5?(d.cvd>0?1:-1) : (d.cvd>0?0.3:-0.3);
-      
-      s.oi = d.oiDelta > 2 ? 1.5 : d.oiDelta < -2 ? -1.5 : d.oiDelta > 0.5 ? 0.5 : -0.5;
-      s.liq = d.liqProx < 0.3 ? (d.cvd>0?-1.5:1.5) : d.liqProx < 0.8 ? (d.cvd>0?-0.5:0.5) : 0;
-      s.fund = d.funding > 0.01 ? -1 : d.funding < -0.01 ? 1 : d.funding > 0.005 ? -0.5 : 0.5;
-      
-      const total = d.vpWin + d.vpLoss;
-      const toxicity = total > 0 ? (d.vpWin - d.vpLoss) / total : 0;
-      s.vpin = toxicity > 0.6 ? 1.5 : toxicity < -0.6 ? -1.5 : toxicity > 0.3 ? 0.5 : toxicity < -0.3 ? -0.5 : 0;
-      if (d.trades % 50 === 0) { d.vpWin=0; d.vpLoss=0; }
-      
-      if (d.cvdHistory.length > 0) {
-        const delta = d.cvd - d.cvdHistory[d.cvdHistory.length-1];
-        s.mom = delta > 8 ? 1.5 : delta < -8 ? -1.5 : delta > 3 ? 0.5 : delta < -3 ? -0.5 : 0;
-      }
-      d.cvdHistory.push(d.cvd);
-      if (d.cvdHistory.length > 4) d.cvdHistory.shift();
-      
-      const volRegime = d.volRatio > 1.5 ? 'TREND' : d.volRatio < 0.8 ? 'CHOP' : 'TRANSITION';      const liqRisk = d.liqProx < 0.5 ? 'SQUEEZE' : 'NORMAL';
-      d.regime = `${volRegime} + ${liqRisk}`;
-      
-      const raw = s.cvd*2.0 + s.oi*1.5 + s.liq*1.5 + s.fund*1.0 + s.vpin*1.0 + s.mom*1.2;
-      
-      const buyThresh = CONFIG.thresholds.buyBase * vm;
-      const sellThresh = CONFIG.thresholds.sellBase * vm;
-      const sbThresh = CONFIG.thresholds.strongBuy * vm;
-      const ssThresh = CONFIG.thresholds.strongSell * vm;
-      
-      let signal = 'NEUTRAL', sigClass = 'neutral';
-      if (raw >= sbThresh) { signal='STRONG BUY 🔥'; sigClass='strong-buy'; }
-      else if (raw >= buyThresh) { signal='BUY'; sigClass='buy'; }
-      else if (raw <= ssThresh) { signal='STRONG SELL 🔥'; sigClass='strong-sell'; }
-      else if (raw <= sellThresh) { signal='SELL'; sigClass='sell'; }
-      
-      d.score = raw; d.signal = signal; d.sigClass = sigClass;
-      d.confidence = Math.max(0, Math.min(100, (Math.abs(raw)/10)*100 + cb));
-      d.indicatorScores = s; d.vm = vm;
     }
 
     function render() {
-      try {
-        const container = document.getElementById('cards-container');
-        if (!container) { console.error('Cards container not found'); return; }
+      const container = document.getElementById('container');
+      container.innerHTML = symbols.map(sym => {
+        const d = data[sym];
+        const isUp = d.price > d.vwap || d.cvd > 0;
         
-        container.innerHTML = Object.entries(state.data).map(([sym, d]) => {
-          const isUp = d.price > d.vwap;
-          const confWidth = Math.min(100, d.confidence);
-          const confColor = d.confidence > 70 ? '#00ff88' : d.confidence > 40 ? '#00d4ff' : '#ff9500';
-          
-          return `
-            <div class="card">
-              <div class="card-header">
-                <span class="asset-name">${sym}</span>
-                <span class="price ${isUp?'up':'down'}">$${d.price.toFixed(2)}</span>
+        return `
+          <div class="card">
+            <div class="header-row">
+              <span class="symbol">${sym}</span>
+              <span class="price ${isUp?'up':'down'}">$${d.price > 0 ? d.price.toFixed(2) : '---'}</span>
+            </div>
+            <div class="grid">
+              <div class="box">
+                <div class="label">CVD</div>
+                <div class="value" style="color:${d.cvd>0?'#00ff88':'#ff3366'}">${d.cvd.toFixed(3)}</div>
               </div>
-              <div class="metrics">
-                <div class="metric"><div class="metric-label">CVD</div><div class="metric-value" style="color:${d.cvd>0?'#00ff88':'#ff3366'}">${d.cvd.toFixed(2)}</div></div>
-                <div class="metric"><div class="metric-label">OI Δ</div><div class="metric-value" style="color:${d.oiDelta>0?'#00ff88':'#ff3366'}">${d.oiDelta.toFixed(2)}%</div></div>
-                <div class="metric"><div class="metric-label">LIQ PROX</div><div class="metric-value">${d.liqProx.toFixed(2)}%</div></div>
-                <div class="metric"><div class="metric-label">FUNDING</div><div class="metric-value" style="color:${d.funding>0.01?'#ff3366':'#00ff88'}">${d.funding.toFixed(3)}%</div></div>
-                <div class="metric"><div class="metric-label">VPIN</div><div class="metric-value">${(d.vpWin+d.vpLoss>0?((d.vpWin-d.vpLoss)/(d.vpWin+d.vpLoss)):0).toFixed(2)}</div></div>
-                <div class="metric"><div class="metric-label">VOL</div><div class="metric-value">${d.volRatio.toFixed(2)}x</div></div>
+              <div class="box">
+                <div class="label">TRADES</div>
+                <div class="value">${d.trades}</div>
               </div>
-              <div style="font-size:0.75rem;color:#6b7280;margin:0.3rem 0">Regime: ${d.regime}</div>
-              <div class="signal-box ${d.sigClass}">${d.signal}</div>
-              <div style="font-size:0.75rem;color:#6b7280;margin-top:0.3rem">Score: ${d.score.toFixed(1)} | VM: ${d.vm.toFixed(2)} | Conf: ${d.confidence.toFixed(0)}%</div>
-              <div class="confidence-bar"><div class="confidence-fill" style="width:${confWidth}%;background:${confColor}"></div></div>
-              <div class="controls">                <button class="btn btn-primary" onclick="logTrade('${sym}','${d.signal.includes('BUY')?'BUY':'SELL'}',${d.price})">📝 LOG</button>
-                <button class="btn btn-secondary" onclick="resetCVD('${sym}')">🔄 RESET CVD</button>
+              <div class="box">
+                <div class="label">VWAP</div>
+                <div class="value">$${d.vwap > 0 ? d.vwap.toFixed(0) : '---'}</div>
+              </div>
+              <div class="box">
+                <div class="label">FUNDING</div>
+                <div class="value" style="color:${d.funding>=0?'#00ff88':'#ff3366'}">${d.funding.toFixed(3)}%</div>
               </div>
             </div>
-          `;
-        }).join('');
-      } catch (e) {
-        console.error('Render error:', e);
-      }
+            <div class="signal ${d.signal.toLowerCase()}">${d.signal}</div>
+            <div class="debug">
+              Messages: ${msgCount} | Last Update: ${d.lastUpdate ? new Date(d.lastUpdate).toLocaleTimeString() : 'Never'}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
-    function logTrade(sym, type, price) {
-      state.trades.unshift({sym,type,price,time:new Date().toLocaleTimeString(),pnl:null});
-      localStorage.setItem('scalp_trades', JSON.stringify(state.trades));
-      if(navigator.vibrate) navigator.vibrate(30);
-      alert(`${type} ${sym} @ $${price.toFixed(2)} logged!`);
-    }
-    
-    function resetCVD(sym) { if(state.data[sym]) state.data[sym].cvd = 0; }
-    
-    function showView(v) {
-      document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active', i===(v==='signals'?0:v==='trades'?1:2)));
-      document.getElementById('trade-modal').classList.toggle('active', v==='trades');
-      if(v==='trades') updateTradeUI();
-    }
-    
-    function closeModal() { document.getElementById('trade-modal').classList.remove('active'); }
-    
-    function updateTradeUI() {
-      const list = document.getElementById('trade-list');
-      const closed = state.trades.filter(t=>t.pnl!==null);
-      list.innerHTML = state.trades.slice(0,15).map(t=>`
-        <div class="trade-item ${t.type==='BUY'?'buy':'sell'}">
-          <span><strong>${t.sym}</strong> ${t.type} @ $${t.price.toFixed(2)}</span>
-          <span>${t.time}</span>
-        </div>`).join('') || '<div style="text-align:center;color:#6b7280;padding:1rem">No trades yet</div>';
-    }
-
-    // Initialize
+    // Start
     window.addEventListener('DOMContentLoaded', () => {
-      console.log('✅ DOM Loaded');
-      render();
-      initWS();
-      setInterval(render, CONFIG.updateUI);
+      console.log(' Futures Scalper Starting...');      render();
+      connect();
+      setInterval(render, 1000);
     });
   </script>
 </body>
